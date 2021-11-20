@@ -28,6 +28,7 @@
                 <field name="amount_total" position="after">
                     <field name="amount_delivered" sum="Total" widget="monetary"/>
                     <field name="amount_invoiced" sum="Total" widget="monetary"/>
+                    <field name="amount_undelivered" sum="Total" widget="monetary"/>
                 </field>
             </field>
         </record>
