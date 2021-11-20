@@ -1,18 +1,18 @@
 {
-    'name': "UoM Dimensions in Sales",
+    'name': "UoM Dimensions in purchases",
 
     'summary': """
-        Allows the use of UoM dimensions in sales.""",
+        Allows the use of UoM dimensions in purchases.""",
     'author': "BADEP",
     'website': "https://badep.ma",
-    'category': 'Sales Management',
+    'category': 'purchases Management',
     'version': '12.0.1.0.1',
     'images': ['static/src/img/banner.png'],
     'license': 'AGPL-3',
-    'depends': ['sale', 'uom_dimension'],
+    'depends': ['purchase', 'uom_dimension'],
     'data': [
-             'views/sale_views.xml',
-             'report/sale_report_templates.xml',
+             'views/purchase_views.xml',
+             'report/purchase_report_templates.xml',
              'security/ir.model.access.csv',
              ],
     'auto_install': True,
