@@ -29,7 +29,8 @@ class SaleOrderLine(models.Model):
     def _compute_amount_delivered_invoiced(self):
         for line in self:
             line.update({
-                'price_undelivered': line.price_total - line.price_delivered,
+
+                'price_undelivered': line.price_total * ((line.product_uom_qty - line.qty_delivered) / line.product_uom_qty) if line.product_uom_qty else 0,
                 'price_delivered': line.price_total * (line.qty_delivered / line.product_uom_qty) if line.product_uom_qty else 0,
                 'price_invoiced': line.price_total * (line.qty_invoiced / line.product_uom_qty) if line.product_uom_qty else 0,
             })
