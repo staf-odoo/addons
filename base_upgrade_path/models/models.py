@@ -4,7 +4,7 @@ import requests
 class IrModuleModule(models.Model):
     _inherit = 'ir.module.module'
 
-    upgrade_available = fields.Boolean(string='Available in v14', compute='_upgrade_available', store=True)
+    upgrade_available = fields.Boolean(string='Upgradable', compute='_upgrade_available', store=True)
     #todo: this should not be per module. Probably ir.config_parameter
     target = fields.Selection([
         ('12.0', '12.0'),
@@ -25,6 +25,12 @@ class IrModuleModule(models.Model):
                     if r.status_code == 200:
                         rec.upgrade_available = True
                         return
+                    r = requests.head("https://pypi.org/project/odoo%s-addon-%s/" % (rec.target.replace('.0', ''),
+                                                                               (rec.alternative_name if rec.alternative_name else rec.name).replace('_', '-')))
+                    if r.status_code == 200:
+                        rec.upgrade_available = True
+                        return
+
                     for repo in self.env['ir.module.repo'].search([]):
                         path = 'https://api.github.com/repos/%s/contents/' % (repo.name)
                         if repo.subpath:
@@ -36,6 +42,7 @@ class IrModuleModule(models.Model):
                             data = requests.get(path)
                         if data.status_code == 200:
                             rec.upgrade_available = True
+                            return
                     rec.upgrade_available = False
                 except requests.ConnectionError:
                     rec.upgrade_available = False
