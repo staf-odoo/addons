@@ -35,7 +35,7 @@ class IrModuleModule(models.Model):
                         path = 'https://api.github.com/repos/%s/contents/' % (repo.name)
                         if repo.subpath:
                             path = path + repo.subpath + '/'
-                        path = path + (rec.rec.alternative_name if rec.alternative_name else rec.name) + ('?ref=%s' % rec.target)
+                        path = path + (rec.alternative_name if rec.alternative_name else rec.name) + ('?ref=%s' % rec.target)
                         if repo.token:
                             data = requests.get(path, auth=(repo.username, repo.token))
                         else:
