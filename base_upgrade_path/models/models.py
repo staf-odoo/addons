@@ -11,12 +11,14 @@ class IrModuleModule(models.Model):
         ('13.0', '13.0'),
         ('14.0', '14.0'),
         ('15.0', '15.0'),
-    ], default='14.0', required=True)
+    ], default='14.0', required=False)
     alternative_name = fields.Char(string='Alternative name')
 
     @api.depends('target', 'alternative_name', 'state')
     def _upgrade_available(self):
         for rec in self.filtered(lambda m: m.state == 'installed'):
+            if not rec.target:
+                rec.target = '14.0'
             if rec.author == 'Odoo S.A.':
                 rec.upgrade_available = True
             else:
