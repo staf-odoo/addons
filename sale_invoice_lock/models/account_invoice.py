@@ -7,5 +7,6 @@ class AccountInvoice(models.Model):
 
     def write(self, vals):
         for rec in self.filtered(lambda i: any(s.state == 'done' for s in i.invoice_line_ids.mapped('sale_line_ids.order_id'))):
-            raise UserError('La commande relative est bloquée')
+            if not self.env.user.has_group('base.group_erp_manager'):
+                raise UserError('La commande relative est bloquée')
         return super().write(vals)
