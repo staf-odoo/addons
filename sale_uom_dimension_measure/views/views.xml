@@ -263,6 +263,7 @@
         <record id="view_sale_measure_map" model="ir.ui.view">
             <field name="name">view.sale.measure.map</field>
             <field name="model">sale.measure</field>
+            <field name="type">google_map</field>
             <field name="arch" type="xml">
                 <google_map string="Maps" library="geometry" lat="shipping_latitude" lng="shipping_longitude" color="orange">
                     <field name="shipping_latitude"/>
