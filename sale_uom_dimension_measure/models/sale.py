@@ -25,7 +25,7 @@ class SaleOrder(models.Model):
             "view_mode": "tree,form,google_map",
             "context": self.env.context,
         }
-
+    # Ok
     @api.depends('measure_ids')
     def _compute_measure_ids(self):
         for measure in self:

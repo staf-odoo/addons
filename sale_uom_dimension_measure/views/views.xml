@@ -272,7 +272,7 @@
                     <field name="partner_id"/>
                     <field name="measure_start"/>
                     <field name="measure_end"/>
-                    <!--                    <field name="state"/>-->
+                    <!--           <field name="state"/>-->
                     <templates>
                         <t t-name="kanban-box">
                             <div t-attf-class="oe_kanban_card oe_kanban_global_click">
