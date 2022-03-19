@@ -116,7 +116,7 @@ class SaleOrderLine(models.Model):
                     'quantity': 0,
                     'expected_quantity': d.quantity,
                 }) for d in rec.dimension_ids]
-            }) for d in range(number)]
+            }) for d in range(int(number))]
 
     def _prepare_procurement_values(self, group_id=False):
         values = super(SaleOrderLine, self)._prepare_procurement_values(group_id)
