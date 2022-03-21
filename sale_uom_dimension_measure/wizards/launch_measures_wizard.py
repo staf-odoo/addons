@@ -30,6 +30,10 @@ class LaunchMeasureWizard(models.TransientModel):
         return res
 
     def create_measure(self):
+        if not self.env['sale.measure'].search([('sale_order_id', '=', self.env.context.get('active_id'))]).filtered(lambda m: m.state == 'draft'):
+            self.env['sale.measure'].create({
+                'sale_order_id': self.env.context.get('active_id'),
+            })
         for line in self.measure_line_ids:
             line.sale_order_line_id.action_create_measures(line.quantity)
 
