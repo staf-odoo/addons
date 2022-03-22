@@ -209,7 +209,8 @@ class MrpProductionBatch(models.Model):
 
     # todo: look at any and toggle all to homogeneise display
     def action_toggle_is_locked(self):
-        self.mapped('production_ids').action_toggle_is_locked()
+        for mo in self.mapped('production_ids'):
+            mo.action_toggle_is_locked()
 
     def button_plan(self):
         for rec in self.filtered(lambda p: p.state == 'confirmed'):
@@ -269,6 +270,7 @@ class MrpProductionBatch(models.Model):
         batch = super().create(values)
         if values.get('production_ids'):
             batch.action_update_move_data()
+            batch.request_validation()
         return batch
 
     def unlink(self):

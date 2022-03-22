@@ -8,47 +8,37 @@ class MrpProduction(models.Model):
 
     mrp_production_batch_id = fields.Many2one('mrp.production.batch')
 
-    def get_suitable_batches(self, vals):
-        batches = self.env['mrp.production.batch'].search([
-            ('state', '=', 'draft'),
-            ('picking_type_id', '=', vals.get('picking_type_id')),
-            ('routing_id', '=', vals.get('routing_id')),
-            # ('origin', '=', production.origin)
-        ])
-        attribute_values = self.env['product.product'].browse(vals['product_id']).product_template_attribute_value_ids.filtered(lambda v: not v.attribute_id.group_in_mrp_batch)
-        return batches.filtered(lambda b: attribute_values in b.attribute_value_ids or attribute_values == b.attribute_value_ids)
-
     @api.model
     def create(self, vals):
-        if not vals.get('mrp_production_batch_id'):
-            batches = self.get_suitable_batches(vals)
-            if batches:
-                batch = batches[0]
+        production = super().create(vals)
+        if not production.mrp_production_batch_id:
+            batch = self.env['mrp.production.batch'].search(
+                [('state', '=', 'confirmed'), ('picking_type_id', '=', production.picking_type_id.id),
+                 ('routing_id', '=', production.routing_id.id), ('origin', '=', production.origin)], limit=1)
+            attribute_values = production.product_id.product_template_attribute_value_ids.filtered(lambda v: not v.attribute_id.group_in_mrp_batch)
+            if batch and (attribute_values in batch.attribute_value_ids or attribute_values == batch.attribute_value_ids):
+                production.write({'mrp_production_batch_id': batch.id})
+                # if production.origin:
+                #     batch.write({'origin': batch.origin + ',' + production.origin if batch.origin else production.origin})
             else:
                 batch = self.env['mrp.production.batch'].create({
-                    'origin': vals.get('origin'),
-                    'routing_id': vals.get('routing_id'),
-                    'date_planned_start': vals.get('date_planned_start'),
-                    'date_planned_finished': vals.get('date_planned_finished'),
-                    'user_id': vals.get('user_id'),
-                    'company_id': vals.get('company_id'),
-                    'picking_type_id': vals.get('picking_type_id'),
-                    'location_src_id': vals.get('location_src_id'),
-                    'location_dest_id': vals.get('location_dest_id'),
+                    'origin': production.origin,
+                    'routing_id': production.routing_id and production.routing_id.id or False,
+                    'date_planned_start': production.date_planned_start,
+                    'date_planned_finished': production.date_planned_finished,
+                    'state': 'confirmed',
+                    'user_id': production.user_id.id if production.user_id and production.user_id.id != SUPERUSER_ID else False,
+                    'company_id': production.company_id.id,
+                    'picking_type_id': production.picking_type_id.id,
+                    'location_src_id': production.location_src_id.id,
+                    'location_dest_id': production.location_dest_id.id,
+                    'production_ids': [(6, 0, production.ids)]
                 })
-
-            vals.update({
-                'mrp_production_batch_id': batch.id,
-                'procurement_group_id': batch.procurement_group_id.id
-            })
+            batch.action_update_move_data()
         else:
-            vals.update({
-                'procurement_group_id': self.env['mrp.production.batch'].browse(vals['mrp_production_batch_id']).procurement_group_id.id
-            })
-        production = super().create(vals)
-        production.mrp_production_batch_id.action_update_move_data()
+            production.mrp_production_batch_id.action_update_move_data()
+            production.mrp_production_batch_id.request_validation()
         return production
-
 
 class MrpWorkorder(models.Model):
     _inherit = 'mrp.workorder'
