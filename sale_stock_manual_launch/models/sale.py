@@ -9,11 +9,15 @@ class SaleOrder(models.Model):
     launch_state = fields.Selection([('normal', 'En cours'), ('blocked', 'Pas encore lancé'), ('done', 'Lancé complètement')], string='Avancement',
                                     compute='_get_to_launch', store=False)
 
+    l_state = fields.Selection([('normal', 'En cours'), ('blocked', 'Pas encore lancé'), ('done', 'Lancé complètement')], string='Procurement State',
+                                    compute='_get_to_launch', store=True)
+
     @api.depends('order_line.to_launch')
     def _get_to_launch(self):
         for rec in self:
             rec.launch_state = 'blocked' if all(line.to_launch for line in rec.order_line) else 'normal' if any(
                 line.to_launch for line in rec.order_line) else 'done'
+            rec.l_state = rec.launch_state
 
 
 class SaleOrderLine(models.Model):
