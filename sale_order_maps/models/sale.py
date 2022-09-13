@@ -8,10 +8,22 @@ from odoo.addons.base_geolocalize.models.res_partner import (
 class SaleOrder(models.Model):
     _inherit = 'sale.order'
 
-    shipping_longitude = fields.Float(string='Shipping Longitude', related='partner_shipping_id.partner_longitude',
-                                      store=False, readonly=False, digits=(16, 5))
-    shipping_latitude = fields.Float(string='Shipping Latitude', related='partner_shipping_id.partner_latitude',
-                                     store=False, readonly=False, digits=(16, 5))
+    # shipping_longitude = fields.Float(string='Shipping Longitude', related='partner_shipping_id.partner_longitude',
+    #                                   store=False, readonly=False, digits=(16, 5), compute_sudo=True)
+    # shipping_latitude = fields.Float(string='Shipping Latitude', related='partner_shipping_id.partner_latitude',
+    #                                  store=False, readonly=False, digits=(16, 5), compute_sudo=True)
+    shipping_longitude = fields.Float(string='Shipping Longitude', compute='_get_partner_geolocation', inverse='_set_partner_geolocation', digits=(16, 5), compute_sudo=True)
+    shipping_latitude = fields.Float(string='Shipping Latitude', compute='_get_partner_geolocation', inverse='_set_partner_geolocation', digits=(16, 5), compute_sudo=True)
+
+    def _get_partner_geolocation(self):
+        for rec in self:
+            rec.shipping_longitude = rec.partner_shipping_id.partner_longitude
+            rec.shipping_latitude = rec.partner_shipping_id.partner_latitude
+
+    def _set_partner_geolocation(self):
+        for rec in self:
+            rec.sudo().partner_shipping_id.partner_longitude = rec.shipping_longitude
+            rec.sudo().partner_shipping_id.partner_latitude = rec.shipping_latitude
 
     def geo_localize(self):
         google_api_key = self.env['ir.config_parameter'].sudo().get_param(
