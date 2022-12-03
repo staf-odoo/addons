@@ -32,6 +32,7 @@ class LaunchProcurementWizard(models.TransientModel):
 
     def launch_procurement(self):
         for line in self.line_ids:
+            line._check_max_qty()
             line.sale_order_line_id.with_context(qty_to_launch=line.quantity).action_launch_procurement()
 
 class LaunchProcurementWizardLine(models.TransientModel):
@@ -45,6 +46,6 @@ class LaunchProcurementWizardLine(models.TransientModel):
     @api.constrains('quantity')
     def _check_max_qty(self):
         for rec in self:
-            if rec.quantity > rec.sale_order_line_id.product_uom_qty:
+            if rec.quantity > rec.sale_order_line_id.product_uom_qty - rec.sale_order_line_id.procurement_qty:
                 raise ValidationError("Vous ne pouvez pas lancer en approvisionnement plus que la quantité restante: %s" % (rec.sale_order_line_id.product_uom_qty - rec.sale_order_line_id.procurement_qty))
 
