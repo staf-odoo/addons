@@ -24,6 +24,7 @@ class SaleOrderLine(models.Model):
     _inherit = 'sale.order.line'
 
     procurement_qty = fields.Float(string="Qté lancée", compute='_get_procurement_quantity', digits=dp.get_precision('Product Unit of Measure'), store=False)
+    procurement_qty2 = fields.Float(string="Qté lancée 2", digits=dp.get_precision('Product Unit of Measure'), store=True)
     to_launch = fields.Boolean(string="To Launch Procurement", compute='_get_to_launch', store=False)
 
     @api.one
