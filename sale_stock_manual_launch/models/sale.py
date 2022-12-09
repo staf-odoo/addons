@@ -23,8 +23,9 @@ class SaleOrder(models.Model):
 class SaleOrderLine(models.Model):
     _inherit = 'sale.order.line'
 
-    procurement_qty = fields.Float(string="Qté lancée", compute='_get_procurement_quantity', digits=dp.get_precision('Product Unit of Measure'), store=False)
-    procurement_qty2 = fields.Float(string="Qté lancée 2", digits=dp.get_precision('Product Unit of Measure'), store=True)
+    procurement_qty = fields.Float(string="Qté lancée", compute='_get_procurement_quantity', digits=dp.get_precision('Product Unit of Measure'), store=True)
+    procurement_qty2 = fields.Float(string="Qté lancée (Old)", compute='_get_procurement_quantity', digits=dp.get_precision('Product Unit of Measure'), store=False)
+
     to_launch = fields.Boolean(string="To Launch Procurement", compute='_get_to_launch', store=False)
 
     @api.one
@@ -35,6 +36,7 @@ class SaleOrderLine(models.Model):
     def _get_procurement_quantity(self):
         for rec in self:
             rec.procurement_qty = rec.qty_delivered_manual or super(SaleOrderLine, rec.with_context(previous_product_uom_qty={rec.id: 0}))._get_qty_procurement()
+            rec.procurement_qty2 = rec.qty_delivered_manual or super(SaleOrderLine, rec.with_context(previous_product_uom_qty={rec.id: 0}))._get_qty_procurement()
 
     def action_launch_procurement(self):
         return self._action_launch_stock_rule()
