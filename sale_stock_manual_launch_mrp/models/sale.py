@@ -16,6 +16,7 @@ class SaleOrderLine(models.Model):
             self.procurement_qty_manual = self.env.context['qty_to_launch']
         return super().action_launch_procurement()
 
+    @api.depends('qty_delivered_manual', 'move_ids.state', 'move_ids.scrapped', 'move_ids.product_uom_qty', 'move_ids.product_uom', 'move_ids', 'procurement_qty_manual', 'move_ids.picking_id')
     def _get_procurement_quantity(self):
         for rec in self:
             bom = self.env['mrp.bom']._bom_find(product=rec.product_id)
