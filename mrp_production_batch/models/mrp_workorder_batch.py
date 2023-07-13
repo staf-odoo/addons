@@ -65,11 +65,10 @@ class MrpWorkorderBatch(models.Model):
                  'workorder_ids.is_produced', 'workorder_ids.time_ids', 'workorder_ids.working_user_ids')
     def get_related_fields(self):
         for rec in self.filtered(lambda b: b.workorder_ids):
-            # rec.date_start = rec.workorder_ids.mapped('date_start')[0]
-            # rec.date_finished = rec.workorder_ids.mapped('date_finished')[0]
-            # rec.state = rec.workorder_ids.mapped('state')[0]
-            raise UserWarning(all(rec.workorder_ids.sudo().mapped('is_produced')))
-            rec.is_produced = all(rec.workorder_ids.sudo().mapped('is_produced'))
+            rec.date_start = rec.workorder_ids.mapped('date_start')[0]
+            rec.date_finished = rec.workorder_ids.mapped('date_finished')[0]
+            rec.state = rec.workorder_ids.mapped('state')[0]
+            rec.is_produced = False #all(rec.workorder_ids.sudo().mapped('is_produced'))
             # rec.working_user_ids = rec.workorder_ids.mapped('working_user_ids')
             # rec.is_user_working = any([order.is_user_working for order in rec.workorder_ids])
 
