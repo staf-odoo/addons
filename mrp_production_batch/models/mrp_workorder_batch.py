@@ -74,6 +74,7 @@ class MrpWorkorderBatch(models.Model):
                 rec.is_user_working = any([order.is_user_working for order in rec.workorder_ids])
             else:
                 rec.is_produced = False
+                rec.is_user_working = False
     def _compute_is_first_wob(self):
         for wob in self:
             wob.is_first_wob = (wob.mrp_production_batch_id.workorder_batch_ids[0] == wob)
