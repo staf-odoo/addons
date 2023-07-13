@@ -70,7 +70,7 @@ class MrpWorkorderBatch(models.Model):
             rec.state = rec.workorder_ids.mapped('state')[0]
             # rec.is_produced = all(rec.workorder_ids.sudo().mapped('is_produced'))
             #rec.time_ids = rec.workorder_ids.mapped('time_ids')
-            rec.working_user_ids = rec.workorder_ids.mapped('working_user_ids')
+            # rec.working_user_ids = rec.workorder_ids.mapped('working_user_ids')
             rec.is_user_working = any([order.is_user_working for order in rec.workorder_ids])
 
     def _compute_is_first_wob(self):
