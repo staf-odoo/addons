@@ -64,14 +64,16 @@ class MrpWorkorderBatch(models.Model):
     @api.depends('workorder_ids.state', 'workorder_ids.date_start', 'workorder_ids.date_finished',
                  'workorder_ids.is_produced', 'workorder_ids.time_ids', 'workorder_ids.working_user_ids')
     def get_related_fields(self):
-        for rec in self.filtered(lambda b: b.workorder_ids):
-            rec.date_start = rec.workorder_ids.mapped('date_start')[0]
-            rec.date_finished = rec.workorder_ids.mapped('date_finished')[0]
-            rec.state = rec.workorder_ids.mapped('state')[0]
-            rec.is_produced = False #all(rec.workorder_ids.sudo().mapped('is_produced'))
-            # rec.working_user_ids = rec.workorder_ids.mapped('working_user_ids')
-            # rec.is_user_working = any([order.is_user_working for order in rec.workorder_ids])
-
+        for rec in self:
+            if rec.workorder_ids:
+                rec.date_start = rec.workorder_ids.mapped('date_start')[0]
+                rec.date_finished = rec.workorder_ids.mapped('date_finished')[0]
+                rec.state = rec.workorder_ids.mapped('state')[0]
+                rec.is_produced = all(rec.workorder_ids.sudo().mapped('is_produced'))
+                rec.working_user_ids = rec.workorder_ids.mapped('working_user_ids')
+                rec.is_user_working = any([order.is_user_working for order in rec.workorder_ids])
+            else:
+                rec.is_produced = False
     def _compute_is_first_wob(self):
         for wob in self:
             wob.is_first_wob = (wob.mrp_production_batch_id.workorder_batch_ids[0] == wob)
