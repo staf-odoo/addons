@@ -14,8 +14,11 @@ class UomLine(models.AbstractModel):
 
     @api.model
     def default_get(self, fields_list):
-         res['dimension_ids'].remove(dim_values)
-         return res
+        res = super().default_get(fields_list)
+        for dim_values in res.get('dimension_ids', []):
+            if dim_values[0] == 6:
+                res['dimension_ids'].remove(dim_values)
+        return res
 
     @api.onchange('product_dimension_qty', 'dimension_ids')
     def onchange_dimension_ids(self):
