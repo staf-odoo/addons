@@ -230,7 +230,7 @@ class MrpProductionBatch(models.Model):
                 workorders.filtered(lambda w: w.operation_id == operation).write(
                     {'mrp_workorder_batch_id': workorder_batch.id})
             orders_to_plan = self.filtered(lambda order: order.routing_id and order.state == 'confirmed')
-            return orders_to_plan.write({'state': 'progress'})
+            orders_to_plan.write({'state': 'progress'})
 
     def button_unplan(self):
         self.mapped('production_ids').button_unplan()
