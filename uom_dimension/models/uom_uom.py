@@ -22,24 +22,30 @@ class UomUom(models.Model):
     code = fields.Text(string='Python Code', default=DEFAULT_PYTHON_CODE)
     number_rounding = fields.Float(string='Précision des nombres', digits=(12, 6), default=1)
 
-    def eval_values(self, dimension_values, product_dimension_qty = 1):
+    def eval_values(self, dimension_values, product_dimension_qty=1, custom_code=None):
         for uom in self:
-            if uom.calculation_type == 'simple':
-                code = 'result = product_dimension_qty * numpy.prod(list(dimension_values.values()))'
+            if custom_code:
+                code = custom_code
+            elif uom.calculation_type == 'simple':
+                code = 'result = numpy.prod(list(dimension_values.values()))'
             else:
                 code = uom.code
             eval_context = {
                 'env': self.env,
-                'time': time,
-                'datetime': datetime,
-                'dateutil': dateutil,
-                'numpy': numpy,
+                'datetime': safe_eval.datetime,
+                'dateutil': safe_eval.dateutil,
+                'time': safe_eval.time,
+                'numpy': safe_eval.wrap_module(__import__('numpy'), ['prod']),
                 'Warning': exceptions.Warning,
                 'record': uom,
                 'product_dimension_qty': product_dimension_qty,
                 'dimension_values': dimension_values,
                 'result': 0,
             }
+            for dimension_id in dimension_values:
+                eval_context.update({
+                    self.env['uom.dimension'].browse(dimension_id).name: dimension_values[dimension_id]
+                })
             # try:
             safe_eval.safe_eval(code, eval_context, mode="exec", nocopy=True)
             return float(eval_context['result'])
