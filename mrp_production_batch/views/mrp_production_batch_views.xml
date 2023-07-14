@@ -31,9 +31,7 @@
 <!--                                attrs="{'invisible': ['|', ('state', 'in', ('draft', 'cancel', 'done', 'to_close')), ('qty_producing', '=', 0)]}"-->
 <!--                                string="Validate" type="object" class="oe_highlight"/>-->
                         <button name="button_mark_done" attrs="{'invisible': [
-                            '&amp;',
-                            ('qty_producing', '=', 0),
-                            ('state', '!=', 'to_close')]}" string="Mark as Done" type="object" class="oe_highlight"/>
+                            ('state', '!=', 'to_close')]}" string="Mark as Done." type="object" class="oe_highlight"/>
                         <button name="action_update_move_data" type="object" string="Calculer la MP"/>
                         <button name="action_confirm" attrs="{'invisible': [('state', '!=', 'draft')]}" string="Confirm" type="object"
                                 class="oe_highlight"/>
