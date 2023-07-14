@@ -32,7 +32,7 @@ class UomLine(models.AbstractModel):
         for rec in self:
             qty = rec._compute_dimension_qty(1)
             rounding = rec[rec._uom_field].number_rounding or 1
-            raise exceptions.UserError(_('Test %s - %s - %s.') % (rec[self._qty_field], rec.product_dimension_qty, qty))
+            # raise exceptions.UserError(_('Test %s - %s - %s.') % (rec[self._qty_field], rec.product_dimension_qty, qty))
             rec.product_dimension_qty = float_round(rec[self._qty_field] / qty, precision_rounding=rounding) if (qty != 0) else rec.product_dimension_qty
 
     def _compute_dimension_qty(self, force_qty=None):
