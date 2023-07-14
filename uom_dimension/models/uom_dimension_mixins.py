@@ -1,50 +1,67 @@
-from odoo import models, fields, api
-from odoo.addons import decimal_precision as dp
+from odoo import models, fields, api, exceptions, _
+from odoo.tools.float_utils import float_round
 
 class UomLine(models.AbstractModel):
     _name = 'uom.line'
+    _description = 'UoM Line Mixin'
+
+    _product_field = 'product_id'
+    _uom_field = 'uom_id'
+    _qty_field = 'product_uom_qty'
 
     dimension_ids = fields.One2many('uom.line.dimension', 'line_id', string='Dimensions', copy=True)
-    product_dimension_qty = fields.Integer('Nombre', required=True, default=0)
+    product_dimension_qty = fields.Float('Nombre', required=True, default=0, compute='_get_product_dimension_qty', inverse='onchange_dimension_ids', store=False)
 
     @api.model
     def default_get(self, fields_list):
-        res = super().default_get(fields_list)
-        for dim_values in res.get('dimension_ids', []):
-            if dim_values[0] == 6:
+	def default_get(self, fields_list):
                 res['dimension_ids'].remove(dim_values)
         return res
 
-    def get_uom_field(self):
-        raise NotImplementedError()
-    def get_qty_field(self):
-        raise NotImplementedError()
-
     @api.onchange('product_dimension_qty', 'dimension_ids')
     def onchange_dimension_ids(self):
-        if self.dimension_ids:
-            self[self.get_qty_field()] = self[self.get_uom_field()].eval_values(dict([(d.dimension_id.id, d.quantity) for d in self.dimension_ids]),
-                                               self.product_dimension_qty)
+         for rec in self.filtered(lambda ul: ul.dimension_ids and ul.product_dimension_qty):
+            rec[rec._qty_field] = rec._compute_dimension_qty()
 
+    def _get_product_dimension_qty(self):
+        for rec in self:
+            qty = rec._compute_dimension_qty(1)
+            rounding = rec[rec._uom_field].number_rounding or 1
+            raise exceptions.UserError(_('Test %s - %s - %s.') % (rec[self._qty_field], rec.product_dimension_qty, qty))
+            rec.product_dimension_qty = float_round(rec[self._qty_field] / qty, precision_rounding=rounding) if (qty != 0) else rec.product_dimension_qty
+
+    def _compute_dimension_qty(self, force_qty=None):
+        self.ensure_one()
+        force_qty = force_qty or self.product_dimension_qty
+        if self.dimension_ids:
+            if self._product_field in self:
+                custom_code = self[self._product_field].custom_uom_code and self[self._product_field].custom_uom_code or None
+            else:
+                custom_code = None
+            return self[self._uom_field].eval_values(dict([(d.dimension_id.id, d.quantity) for d in self.dimension_ids]), force_qty, custom_code)
+        return 1
+
+    @api.onchange(_uom_field)
     def onchange_product_uom_set_dimensions(self):
-        product_uom = self[self.get_uom_field()]
+        product_uom = self[self._uom_field]
         if self.dimension_ids and product_uom and sorted(self.dimension_ids.mapped('dimension_id.id')) == sorted(product_uom.dimension_ids.ids):
             return
         self.dimension_ids = [(5, 0, 0)]
         if product_uom:
-            self.dimension_ids = [(0, 0, {'dimension_id': d.id}) for d in product_uom.dimension_ids]
+            self.dimension_ids = [(0, 0, {'dimension_id': d.id, 'quantity': 0}) for d in product_uom.dimension_ids]
 
 class UomLineDimension(models.AbstractModel):
     _name = 'uom.line.dimension'
+    _description = 'UoM Dimension Line Mixin'
 
     line_id = fields.Many2one('uom.line', copy=True)
     dimension_id = fields.Many2one('uom.dimension', required=True, ondelete='cascade')
-    quantity = fields.Float('Quantité', required=True, digits=dp.get_precision('Product Unit of Measure'))
+    quantity = fields.Float('Quantité', required=True, digits='Product Unit of Measure')
     name = fields.Char(compute='get_name', store=True)
     display_name = fields.Char(compute='get_name', store=True)
 
     @api.depends('dimension_id', 'quantity')
     def get_name(self):
         for rec in self.filtered(lambda d: d.dimension_id):
-            rec.display_name = rec.dimension_id.name + ': ' + str(rec.quantity)
-            rec.name = rec.dimension_id.name + ': ' + str(rec.quantity)
+            rec.display_name = rec.dimension_id.name + ': ' + str(round(rec.quantity, 3))
+            rec.name = rec.dimension_id.name + ': ' + str(round(rec.quantity, 3))
