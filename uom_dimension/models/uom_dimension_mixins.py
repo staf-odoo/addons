@@ -20,11 +20,17 @@ class UomLine(models.AbstractModel):
                 res['dimension_ids'].remove(dim_values)
         return res
 
+    # @api.onchange('product_dimension_qty', 'dimension_ids')
+    # def onchange_dimension_ids(self):
+    #      for rec in self.filtered(lambda ul: ul.dimension_ids and ul.product_dimension_qty):
+    #         rec[rec._qty_field] = rec._compute_dimension_qty()
+
     @api.onchange('product_dimension_qty', 'dimension_ids')
     def onchange_dimension_ids(self):
-         for rec in self.filtered(lambda ul: ul.dimension_ids and ul.product_dimension_qty):
-            rec[rec._qty_field] = rec._compute_dimension_qty()
-
+        if self.dimension_ids:
+            self[rec._qty_field] = self[_uom_field].eval_values(dict([(d.dimension_id.id, d.quantity) for d in self.dimension_ids]),
+                                               self.product_dimension_qty)
+# ------
     def _get_product_dimension_qty(self):
         for rec in self:
             qty = rec._compute_dimension_qty(1)
