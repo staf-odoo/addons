@@ -1,4 +1,4 @@
-from odoo import models, fields, api, exceptions
+from odoo import models, fields, api, exceptions, _
 from odoo.tools.float_utils import float_round
 
 class UomLine(models.AbstractModel):
