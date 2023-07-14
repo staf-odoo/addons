@@ -27,9 +27,9 @@
                     <header>
                         <field name="confirm_cancel" invisible="1"/>
                         <field name="show_lock" invisible="1"/>
-                        <button name="button_mark_done"
-                                attrs="{'invisible': ['|', ('state', 'in', ('draft', 'cancel', 'done', 'to_close')), ('qty_producing', '=', 0)]}"
-                                string="Validate" type="object" class="oe_highlight"/>
+<!--                        <button name="button_mark_done"-->
+<!--                                attrs="{'invisible': ['|', ('state', 'in', ('draft', 'cancel', 'done', 'to_close')), ('qty_producing', '=', 0)]}"-->
+<!--                                string="Validate" type="object" class="oe_highlight"/>-->
                         <button name="button_mark_done" attrs="{'invisible': [
                             '&amp;',
                             ('qty_producing', '=', 0),
