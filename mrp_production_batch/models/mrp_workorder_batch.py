@@ -98,7 +98,7 @@ class MrpWorkorderBatch(models.Model):
 
     def record_production(self):
         for wo in self.mapped('workorder_ids').filtered(lambda w: w.state == 'progress'):
-            wo.record_production()
+            wo.button_finish() #button_start-button_pending-button_finish
 
     def get_name(self):
         for rec in self:
