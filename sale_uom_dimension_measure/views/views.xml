@@ -249,7 +249,7 @@
                 </xpath>
                 <xpath expr="//field[@name='order_line']/tree//field[@name='state']" position="before">
                     <button name="action_create_measures" type="object" class="fa fa-tasks"
-                            attrs="{'invisible': ['|', ('parent.state', '!=', 'sale'), ('is_measured', '=', True)]}"/>
+                            attrs="{'invisible': ['|', ('parent.state', 'not in', ('draft', 'sent', 'sale')), ('is_measured', '=', True)]}"/>
                     <field name="is_measured" invisible="1"/>
                 </xpath>
             </field>
