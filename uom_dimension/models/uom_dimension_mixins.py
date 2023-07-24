@@ -1,5 +1,8 @@
-from odoo import models, fields, api, exceptions, _
+from odoo import models, fields, api
 from odoo.tools.float_utils import float_round
+
+from odoo.odoo.exceptions import UserError
+
 
 class UomLine(models.AbstractModel):
     _name = 'uom.line'
@@ -22,20 +25,14 @@ class UomLine(models.AbstractModel):
 
     @api.onchange('product_dimension_qty', 'dimension_ids')
     def onchange_dimension_ids(self):
-         for rec in self.filtered(lambda ul: ul.dimension_ids and ul.product_dimension_qty):
+        for rec in self.filtered(lambda ul: ul.dimension_ids and ul.product_dimension_qty):
             rec[rec._qty_field] = rec._compute_dimension_qty()
 
-    @api.onchange('product_dimension_qty', 'dimension_ids')
-    def onchange_dimension_ids(self):
-        if self.dimension_ids:
-            self[self._qty_field] = self[self._uom_field].eval_values(dict([(d.dimension_id.id, d.quantity) for d in self.dimension_ids]),
-                                               self.product_dimension_qty)
 
     def _get_product_dimension_qty(self):
         for rec in self:
             qty = rec._compute_dimension_qty(1)
             rounding = rec[rec._uom_field].number_rounding or 1
-            # raise exceptions.UserError(_('Test %s - %s - %s.') % (rec[self._qty_field], rec.product_dimension_qty, qty))
             rec.product_dimension_qty = float_round(rec[self._qty_field] / qty, precision_rounding=rounding) if (qty != 0) else rec.product_dimension_qty
 
     def _compute_dimension_qty(self, force_qty=None):
