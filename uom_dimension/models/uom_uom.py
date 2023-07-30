@@ -2,8 +2,6 @@ from odoo import models, fields, api, exceptions, _
 import time, datetime, dateutil, numpy
 from odoo.tools import safe_eval
 
-from odoo.odoo.exceptions import UserError
-
 DEFAULT_PYTHON_CODE = """# Available variables:
 #  - env: Odoo Environment
 #  - record: Uom record
