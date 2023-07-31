@@ -1,8 +1,6 @@
 from odoo import models, fields, api
 from odoo.tools.float_utils import float_round
 
-from odoo.odoo.exceptions import UserError
-
 
 class UomLine(models.AbstractModel):
     _name = 'uom.line'
