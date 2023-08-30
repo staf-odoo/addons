@@ -24,6 +24,8 @@ class SaleOrderLine(models.Model):
     price_undelivered = fields.Monetary(compute='_compute_amount_delivered_invoiced', string='Amount Pending', readonly=True, store=True)
     price_delivered = fields.Monetary(compute='_compute_amount_delivered_invoiced', string='Amount Delivered', readonly=True, store=True)
     price_invoiced = fields.Monetary(compute='_compute_amount_delivered_invoiced', string='Amount Invoiced', readonly=True, store=True)
+    qty_undelivered = fields.Float(compute='_compute_amount_delivered_invoiced', string='Qty Pending', readonly=True,
+                                      store=True)
 
     @api.depends('price_total', 'qty_delivered', 'qty_invoiced')
     def _compute_amount_delivered_invoiced(self):
@@ -33,6 +35,7 @@ class SaleOrderLine(models.Model):
                 'price_undelivered': line.price_total * ((line.product_uom_qty - line.qty_delivered) / line.product_uom_qty) if line.product_uom_qty else 0,
                 'price_delivered': line.price_total * (line.qty_delivered / line.product_uom_qty) if line.product_uom_qty else 0,
                 'price_invoiced': line.price_total * (line.qty_invoiced / line.product_uom_qty) if line.product_uom_qty else 0,
+                'qty_undelivered': (line.product_uom_qty - line.qty_delivered) if line.product_uom_qty else 0,
             })
 
 class SaleReport(models.Model):
