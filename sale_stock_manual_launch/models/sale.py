@@ -6,19 +6,17 @@ from odoo.tools import float_compare
 class SaleOrder(models.Model):
     _inherit = 'sale.order'
 
-    launch_state = fields.Selection([('normal', 'En cours'), ('blocked', 'Pas encore lancé'), ('done', 'Lancé complètement')], string='Avancement',
-                                    compute='_get_to_launch', store=False)
-
-    l_state = fields.Selection([('normal', 'En cours'), ('blocked', 'Pas encore lancé'), ('done', 'Lancé complètement')], string='Procurement State',
+    # launch_state = fields.Selection([('normal', 'En cours'), ('blocked', 'Pas encore lancé'), ('done', 'Lancé complètement')], string='Avancement',
+    launch_state = fields.Selection([('blocked', 'Pas encore lancé'), ('normal', 'Lancé partiellement'), ('done', 'Lancé complètement')], string='Avancement',
                                     compute='_get_to_launch', store=True)
 
     @api.depends('order_line.to_launch')
     def _get_to_launch(self):
         for rec in self:
-            rec.launch_state = 'blocked' if all(line.to_launch for line in rec.order_line) else 'normal' if any(
-                line.to_launch for line in rec.order_line) else 'done'
-            rec.l_state = rec.launch_state
+            rec.launch_state = 'done' if all(not line.to_launch for line in rec.order_line) and rec.state in ('sale', 'done') else 'normal' if any(
+                line.to_launch and line.procurement_qty > 0 for line in rec.order_line) else 'blocked'
 
+            # any(line.to_launch for line in rec.order_line)
 
 class SaleOrderLine(models.Model):
     _inherit = 'sale.order.line'
@@ -26,7 +24,7 @@ class SaleOrderLine(models.Model):
     procurement_qty = fields.Float(string="Qté lancée", compute='_get_procurement_quantity', digits=dp.get_precision('Product Unit of Measure'), store=True)
     procurement_qty2 = fields.Float(string="Qté lancée (Old)", compute='_get_procurement_quantity', digits=dp.get_precision('Product Unit of Measure'), store=False)
 
-    to_launch = fields.Boolean(string="To Launch Procurement", compute='_get_to_launch', store=False)
+    to_launch = fields.Boolean(string="To Launch Procurement", compute='_get_to_launch', store=True)
 
     @api.one
     def get_dummy_qty(self):
