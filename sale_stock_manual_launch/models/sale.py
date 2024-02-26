@@ -40,7 +40,7 @@ class SaleOrderLine(models.Model):
     def action_launch_procurement(self):
         return self._action_launch_stock_rule()
 
-    @api.depends('procurement_qty', 'product_uom_qty')
+    @api.depends('procurement_qty', 'product_uom_qty', 'state')
     def _get_to_launch(self):
         precision = self.env['decimal.precision'].precision_get('Product Unit of Measure')
         for line in self:
