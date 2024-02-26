@@ -14,7 +14,7 @@ class SaleOrder(models.Model):
     def _get_to_launch(self):
         for rec in self:
             rec.launch_state = 'done' if all(not line.to_launch for line in rec.order_line) and rec.state in ('sale', 'done') else\
-                'normal' if any(line.to_launch and line.procurement_qty >= 0  for line in rec.order_line) and rec.state in ('sale', 'done') else \
+                'normal' if any(line.to_launch and line.procurement_qty >= 0 for line in rec.order_line) and rec.state in ('sale', 'done') else \
                 'blocked'
 
             # any(line.to_launch for line in rec.order_line)
