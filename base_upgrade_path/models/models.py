@@ -11,7 +11,10 @@ class IrModuleModule(models.Model):
         ('13.0', '13.0'),
         ('14.0', '14.0'),
         ('15.0', '15.0'),
-    ], default='14.0', required=False)
+        ('16.0', '16.0'),
+        ('17.0', '17.0'),
+        ('18.0', '18.0'),
+    ], default='16.0', required=False)
     alternative_name = fields.Char(string='Alternative name')
 
     @api.depends('target', 'alternative_name', 'state')
