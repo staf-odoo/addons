@@ -8,7 +8,8 @@ class SaleOrder(models.Model):
     amount_undelivered = fields.Monetary(string=u'Total Pending', store=True, readonly=True, compute='_amount_delivered_invoiced', track_visibility='always')
     amount_delivered = fields.Monetary(string=u'Total Delivered', store=True, readonly=True, compute='_amount_delivered_invoiced', track_visibility='always')
     amount_invoiced = fields.Monetary(string=u'Total Invoiced', store=True, readonly=True, compute='_amount_delivered_invoiced', track_visibility='always')
-    
+    total_invoiced = fields.Monetary(string=u'Total Invoiced', store=True, readonly=True, compute='_total_invoiced', track_visibility='always')
+
     @api.depends('order_line.price_delivered', 'order_line.price_undelivered', 'order_line.price_invoiced')
     def _amount_delivered_invoiced(self):
         for order in self:
@@ -16,6 +17,13 @@ class SaleOrder(models.Model):
                 'amount_undelivered': sum(order.order_line.mapped('price_undelivered')),
                 'amount_delivered': sum(order.order_line.mapped('price_delivered')),
                 'amount_invoiced': sum(order.order_line.mapped('price_invoiced')),
+            })
+
+    @api.depends('state', 'invoice_ids.amount_total_signed', 'invoice_ids.state')
+    def _total_invoiced(self):
+        for order in self:
+            order.update({
+                'total_invoiced': sum(order.invoice_ids.mapped('amount_total_signed')),
             })
 
 class SaleOrderLine(models.Model):
