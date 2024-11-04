@@ -22,8 +22,10 @@ class SaleOrder(models.Model):
     @api.depends('state', 'invoice_ids.amount_total_signed', 'invoice_ids.state')
     def _total_invoiced(self):
         for order in self:
+            # Filter invoices with state in ('open', 'in_payment', 'paid') and sum their 'amount_total_signed'
+            total = sum(order.invoice_ids.filtered(lambda inv: inv.state in ('open', 'in_payment', 'paid')).mapped('amount_total_signed'))
             order.update({
-                'total_invoiced': sum(order.invoice_ids.mapped('amount_total_signed')),
+                'total_invoiced': total, #order.invoice_ids.mapped('amount_total_signed')
             })
 
 class SaleOrderLine(models.Model):
